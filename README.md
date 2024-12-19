@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Route Handlers
 
-## Getting Started
+** 웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.**  
+[공식문서 참고](https://nextjs-ko.org/docs/app/building-your-application/routing/route-handlers)
 
-First, run the development server:
+- app 디렉토리 내에서만 사용
+- app 디렉토리 내의 route.js|ts 파일로 정의
+- pages 디렉토리 내의 API Routes와 동일한 기능을 하므로, API Routes와 Route Handlers를 함께 사용할 필요가 ${\textsf{\color{#4174D9}없다.}}$
+- 기본적으로 캐시되지 않지만, GET 메서드에 대해 캐시를 선택할 수 있다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 언제 사용하나?
+
+- IOS나 안드로이드 앱을 만들 경우
+- Webhook 같은 걸 위한 API를 만들어야 하는 경우 등
+
+### 예시
+
+로그인 데이터를 post 요청
+
+/app/login/page.tsx
+
+```tsx
+"use client";
+
+export default function LogIn() {
+  const onClick = async () => {
+    const response = await fetch("/www/users", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "nico",
+        password: "1234",
+      }),
+    });
+    console.log(await response.json()); //
+  };
+  const onClick = async () => {
+    const response = await fetch("/www/users", {
+      method: "POST",
+      body: JSON.stringify({
+        username: "jun",
+      }),
+    });
+    console.log(await response.json()); //{username: 'jun'}
+  };
+  return (
+    <form>
+      <input />
+      <button onClick={onClick}>로그인</button>
+    </form>
+  );
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+/app/api/users/route.ts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```tsx
+import { NextRequest } from "next/server";
+//get 요청
+export async function GET(request: NextRequest) {
+  console.log(request);
+  return Response.json({
+    ok: true,
+  });
+}
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+//post 요청
+export async function POST(request: NextRequest) {
+  const data = await request.json();
+  console.log("log the user in!!!");
+  return Response.json(data);
+}
+```
