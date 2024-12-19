@@ -1,6 +1,7 @@
 ## Route Handlers
 
-** 웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.**  
+__웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.__
+
 [공식문서 참고](https://nextjs-ko.org/docs/app/building-your-application/routing/route-handlers)
 
 - app 디렉토리 내에서만 사용
@@ -23,28 +24,22 @@
 "use client";
 
 export default function LogIn() {
+
   const onClick = async () => {
-    const response = await fetch("/www/users", {
+    const response = await fetch("/api/users", {
       method: "POST",
       body: JSON.stringify({
         username: "nico",
         password: "1234",
       }),
     });
-    console.log(await response.json()); //
+    console.log(await response.json()); // {username: "nico", password: "1234"}
   };
-  const onClick = async () => {
-    const response = await fetch("/www/users", {
-      method: "POST",
-      body: JSON.stringify({
-        username: "jun",
-      }),
-    });
-    console.log(await response.json()); //{username: 'jun'}
-  };
+
   return (
     <form>
       <input />
+      <input type="password" />
       <button onClick={onClick}>로그인</button>
     </form>
   );
