@@ -17,7 +17,10 @@ export type LoginForm = z.infer<typeof loginSchema>;
 export const createAccountSchema = z
   .object({
     username: z
-      .string()
+      .string({
+        required_error: "이름은 필수입니다.",
+        invalid_type_error: "이름은 문자만 가능합니다.",
+      })
       .min(3, { message: "사용자 이름은 최소 3자 이상이어야 합니다." })
       .max(10, { message: "사용자 이름은 최대 10자 이하여야 합니다." })
       .refine((username) => username === "감자칩", {
