@@ -4,21 +4,27 @@ import FormInput from "@/components/form/form-input";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { handleForm } from "./actions";
 import { useFormState } from "react-dom";
+import { createAccount } from "./actions";
 
-export default function Login() {
-  const [state, formAction] = useFormState(handleForm, null);
+export default function CreateAccount() {
+  const [state, formAction] = useFormState(createAccount, null);
   console.log("state", state);
 
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
       <section className="flex flex-col gap-2">
         <CardTitle>어서오세요!</CardTitle>
-        <CardDescription>로그인 ID와 패스워드를 입력해주세요!</CardDescription>
+        <CardDescription>회원가입을 진행해주세요!</CardDescription>
       </section>
       <section>
         <form action={formAction} className="flex flex-col gap-3">
+          <FormInput
+            name="username"
+            placeholder="username"
+            required
+            errors={state?.fieldErrors?.username}
+          />
           <FormInput
             name="email"
             type="email"
@@ -33,7 +39,14 @@ export default function Login() {
             required
             errors={state?.fieldErrors?.password}
           />
-          <FormBtn text="로그인" />
+          <FormInput
+            name="confirm_password"
+            type="password"
+            placeholder="confirm_password"
+            required
+            errors={state?.fieldErrors?.confirm_password}
+          />
+          <FormBtn text="회원가입" />
         </form>
       </section>
       <Separator className="my-4" />

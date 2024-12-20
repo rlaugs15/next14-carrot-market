@@ -1,16 +1,16 @@
 interface FormInputProps {
-  type: string;
+  type?: string;
   placeholder: string;
   required: boolean;
-  errors: string[];
+  errors?: string[];
   name: string;
 }
 
 export default function FormInput({
-  type,
+  type = "text",
   placeholder,
   required,
-  errors,
+  errors = [],
   name,
 }: FormInputProps) {
   return (

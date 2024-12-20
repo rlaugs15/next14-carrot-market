@@ -115,7 +115,9 @@ export default function LogIn() {
 }
 ```
 
-## useFormState
+## useFormState(useFormState -> useActionState로 변경)
+
+> 만약 useActionState로 사용 시 에러가 뜬다면 useFormState로 사용
 
 서버 액션을 ui로 보내는 방법
 
@@ -184,5 +186,70 @@ export default function Login() {
       </section>
     </div>
   );
+}
+```
+
+# 유효성 검사(Validation)
+
+zod를 이용한 유효성 검사
+
+#### /app/login/actions.ts
+
+```tsx
+"use server";
+import { loginSchema } from "@/lib/zod/user-schema";
+
+export async function handleForm(prevState: any, formData: FormData) {
+  const data = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
+  const result = loginSchema.safeParse(data);
+  if (!result.success) {
+    return result.error.flatten();
+  }
+}
+```
+
+- **safeParse()**
+  parse를 사용할 때 타입이 유효하지 않은 경우 Zod가 에러를 발생시키는 것을 원하지 않는다면, .safeParse를 사용
+- **flatten()**
+  Zod 스키마 검증 실패 시 생성된 에러 객체를 더 쉽게 처리할 수 있는 형태로 변환  
+  issues 배열보다 더 직관적이고 활용하기 쉬운 데이터 구조를 제공
+
+---
+
+#### /app/login.tsx
+
+```tsx
+export default function Login() {
+  const [state, formAction] = useFormState(handleForm, null);
+  console.log("state", state);
+
+  return (
+    <div className="flex flex-col gap-10 py-8 px-6">
+      <section className="flex flex-col gap-2">
+        <CardTitle>어서오세요!</CardTitle>
+        <CardDescription>로그인 ID와 패스워드를 입력해주세요!</CardDescription>
+      </section>
+      <section>
+        <form action={formAction} className="flex flex-col gap-3">
+          <FormInput
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            errors={state?.fieldErrors?.email}
+          />
+          <FormInput
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            errors={state?.fieldErrors?.password}
+          />
+          <FormBtn text="로그인" />
+        </form>
+  )
 }
 ```
