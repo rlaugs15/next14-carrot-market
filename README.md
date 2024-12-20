@@ -1,5 +1,12 @@
 # Server Actions
 
+#### Server Actions이란?
+
+- "use server"로 선언된 함수이며, Client Component에서도 호출할 수 있다.
+- 함수나 파일에 작성해 두면, 함수 내용을 자동으로 서버 API로 만들어주고, 개발자는 유저에게 코드가 노출될 걱정 없이 자유롭게 데이터베이스를 관리할 수 있다.
+
+> 리액트 쿼리의 인자로 들어가는 axios나 fetch 요청 함수를 작성할 때 유용할 것 같다.
+
 ## Route Handlers
 
 **웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.**
@@ -103,6 +110,78 @@ export default function LogIn() {
         <FormButton loading={false} text="Log in" />
       </form>
       <SocialLogin />
+    </div>
+  );
+}
+```
+
+## useFormState
+
+서버 액션을 ui로 보내는 방법
+
+#### useFormState란?
+
+폼 제출 시 비동기 작업을 수행하고, 상태를 관리하며, 로딩 상태를 체크할 수 있는 ${\textsf{\color{#4174D9}리액트 훅}}$
+
+- 사용법은 useState와 비슷하다.
+
+클라이언트 컴포넌트에서도 서버액션을 호출할 수 있지만, 로직이 해당 컴포넌트에 있을 순 없다.  
+그러므로 actions.ts로 분리했다.
+
+**/app/login/actions/ts**
+
+```tsx
+"use server";
+export async function handleForm(prevState: any, formData: FormData) {
+  console.log(prevState);
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  return {
+    errors: ["wrong password", "password too short"],
+  };
+}
+```
+
+**/app/login/page.tsx**
+
+```tsx
+"use client";
+import { handleForm } from "./actions";
+import { useFormState } from "react-dom";
+
+export default function Login() {
+  const [state, formAction] = useFormState(handleForm, {
+    error: 1, //원래는 handleForm의 리턴값과 같아야 한다.
+  } as any);
+  return (
+    <div className="flex flex-col gap-10 py-8 px-6">
+      <section>
+        <form action={formAction} className="flex flex-col gap-3">
+          <FormInput
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            errors={state.errors ?? []}
+          />
+          <FormInput
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            errors={state.errors ?? []}
+          />
+          <FormBtn text="로그인" />
+        </form>
+      </section>
+      <Separator className="my-4" />
+      <section className="space-y-4">
+        <Button className="w-full">
+          <span>깃허브 로그인</span>
+        </Button>
+        <Button className="w-full">
+          <span>SMS 로그인</span>
+        </Button>
+      </section>
     </div>
   );
 }

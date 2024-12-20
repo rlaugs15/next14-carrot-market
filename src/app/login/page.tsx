@@ -1,14 +1,16 @@
+"use client";
+import FormBtn from "@/components/form/form-btn";
 import FormInput from "@/components/form/form-input";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { handleForm } from "./actions";
+import { useFormState } from "react-dom";
 
 export default function Login() {
-  const handleForm = async (formData: FormData) => {
-    "use server";
-    console.log(formData.get("email"), formData.get("password"));
-    console.log("서버로 전송");
-  };
+  const [state, formAction] = useFormState(handleForm, {
+    error: 1, //원래는 handleForm의 리턴값과 같아야 한다.
+  } as any);
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
       <section className="flex flex-col gap-2">
@@ -16,22 +18,22 @@ export default function Login() {
         <CardDescription>로그인 ID와 패스워드를 입력해주세요!</CardDescription>
       </section>
       <section>
-        <form action={handleForm} className="flex flex-col gap-3">
+        <form action={formAction} className="flex flex-col gap-3">
           <FormInput
             name="email"
             type="email"
             placeholder="Email"
             required
-            errors={[]}
+            errors={state.errors ?? []}
           />
           <FormInput
             name="password"
             type="password"
             placeholder="Password"
             required
-            errors={[]}
+            errors={state.errors ?? []}
           />
-          <Button className="w-full">로그인</Button>
+          <FormBtn text="로그인" />
         </form>
       </section>
       <Separator className="my-4" />
