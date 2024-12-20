@@ -1,6 +1,8 @@
+# Server Actions
+
 ## Route Handlers
 
-__웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.__
+**웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 커스텀 요청 핸들러를 생성할 수 있다.**
 
 [공식문서 참고](https://nextjs-ko.org/docs/app/building-your-application/routing/route-handlers)
 
@@ -24,7 +26,6 @@ __웹 요청 및 응답 API를 사용하여 특정 경로에 대한 사용자 �
 "use client";
 
 export default function LogIn() {
-
   const onClick = async () => {
     const response = await fetch("/api/users", {
       method: "POST",
@@ -63,5 +64,46 @@ export async function POST(request: NextRequest) {
   const data = await request.json();
   console.log("log the user in!!!");
   return Response.json(data);
+}
+```
+
+## Server actions
+
+**Server Actions은 서버에서 실행되는 비동기 함수**  
+ Next.js 애플리케이션에서 form 제출 및 데이터 변형을 처리하기 위해 서버 및 클라이언트 컴포넌트에서 호출할 수 있다.
+
+백엔드에 요청을 보내는 궁극적인 행위는 똑같은데, ${\textsf{\color{#4174D9}서버액션을 쓰면 이전처럼 손수 라우터 핸들러를 만들어 주지 않아도 된다.}}$
+
+- 네트워크탭을 보면 post 요청이 보내진 것을 확인할 수 있다.
+
+```tsx
+export default function LogIn() {
+  async function handleForm(formData: FormData) {
+    "use server"; //해당 함수가 서버에서만 실행되게 한다. 항상 함수의 최상단에 위치
+    console.log(formData.get("email"), formData.get("password"));
+    console.log("i run in the server baby!");
+  }
+  return (
+      </div>
+      <form action={handleForm} className="flex flex-col gap-3">
+        <FormInput
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          errors={[]}
+        />
+        <FormInput
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          errors={[]}
+        />
+        <FormButton loading={false} text="Log in" />
+      </form>
+      <SocialLogin />
+    </div>
+  );
 }
 ```

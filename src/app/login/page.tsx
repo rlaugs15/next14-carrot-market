@@ -1,26 +1,13 @@
-"use client";
-
-import FormInputField from "@/components/form/form-input-field";
+import FormInput from "@/components/form/form-input";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { LoginForm, loginSchema } from "@/lib/zod/user-schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 
 export default function Login() {
-  const form = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = ({ email, password }: LoginForm) => {
-    console.log("email", email);
-    console.log("password", password);
+  const handleForm = async (formData: FormData) => {
+    "use server";
+    console.log(formData.get("email"), formData.get("password"));
+    console.log("서버로 전송");
   };
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
@@ -29,25 +16,23 @@ export default function Login() {
         <CardDescription>로그인 ID와 패스워드를 입력해주세요!</CardDescription>
       </section>
       <section>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormInputField
-              control={form.control}
-              label="이메일"
-              name="email"
-              type="email"
-              placeholder="이메일을 입력하세요."
-            />
-            <FormInputField
-              control={form.control}
-              label="비밀번호"
-              name="password"
-              type="password"
-              placeholder="비밀번호를 입력하세요."
-            />
-            <Button className="w-full">로그인</Button>
-          </form>
-        </Form>
+        <form action={handleForm} className="flex flex-col gap-3">
+          <FormInput
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            errors={[]}
+          />
+          <FormInput
+            name="password"
+            type="password"
+            placeholder="Password"
+            required
+            errors={[]}
+          />
+          <Button className="w-full">로그인</Button>
+        </form>
       </section>
       <Separator className="my-4" />
       <section className="space-y-4">
