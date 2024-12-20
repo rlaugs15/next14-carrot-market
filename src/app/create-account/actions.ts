@@ -11,6 +11,8 @@ export async function createAccount(prevState: any, formData: FormData) {
   };
   const result = createAccountSchema.safeParse(data);
   if (!result.success) {
+    console.log("에러 결과", result.error.flatten());
+
     return result.error.flatten();
   }
 }
