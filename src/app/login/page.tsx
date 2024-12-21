@@ -6,11 +6,11 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { handleForm } from "./actions";
 import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [state, formAction] = useFormState(handleForm, null);
-  console.log("state", state);
-
   return (
     <div className="flex flex-col gap-10 py-8 px-6">
       <section className="flex flex-col gap-2">
@@ -55,7 +55,7 @@ export default function Login() {
           </svg>
           <span>깃허브 로그인</span>
         </Button>
-        <Button className="w-full">
+        <Button onClick={() => router.push("/sms")} className="w-full">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

@@ -1,6 +1,6 @@
 import z from "zod";
-
-const passwordRegex = new RegExp(/^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
+import { passwordRegex } from "../constants";
+import validator from "validator";
 
 export const loginSchema = z.object({
   email: z
@@ -42,3 +42,12 @@ export const createAccountSchema = z
   .refine((data) => data.password !== data.confirm_password, {
     message: "비밀번호 확인에 실패했습니다.",
   });
+
+export const phoneSchema = z
+  .string()
+  .trim()
+  .refine(
+    (phone) => validator.isMobilePhone(phone, "ko-KR"),
+    "잘못된 전화 형식"
+  );
+export const tokenSchema = z.coerce.number().min(100000).max(999999);
