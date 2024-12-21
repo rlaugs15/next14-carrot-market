@@ -41,3 +41,56 @@ npx prisma init
 DATABASE_URL="file:./database.db"
 
 [Prisma (VSCode Extension)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+
+## Schemas
+
+모델을 생성하고 프리즈마에게 내 DB의 위치를 알려줬고, 데이터 관점에서 모델이 어떻게 생겼는지 알려줘야 한다.
+
+### 1. 모델 생성
+
+**scema.prisma**
+
+```typescript
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  email      String?  @unique
+  password   String?
+  phone      String?  @unique
+  github_id  String?  @unique
+  avatar     String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+```
+
+### npx prisma migrate dev
+
+[공식문서](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/install-prisma-client-typescript-postgresql)
+
+[공식문서: 마이그레이션 생성 및 적용](https://www.prisma.io/docs/orm/prisma-migrate/workflows/development-and-production)
+
+- 이 명령은 Prisma 스키마 변경 사항을 기반으로 새 마이그레이션을 생성하고 적용
+- 주의! migration dev는 개발 명령이므로 프로덕션 환경에서는 절대 사용해서는 안 된다.
+
+명령어를 입력하면 마이그레이션 이름을 추가하라고 나오는데 유저를 생성했으므로 `add_user`라고 하자.
+
+- db에서 만든 변경사항을 계속해서 추적
+- 이름을 입력하면 마이그레이션 파일과 sql 파일을 생성
+- 깃허브에 올릴 수 있다.
+- 추후 같은 파일을 실제 db를 변환하거나 마이그레이션하는 데 적용할 수 있다.
+
+> **env 파일**
+> 나만을 위한 로컬 디비들 추가
+> _.db
+> _.db-journal
