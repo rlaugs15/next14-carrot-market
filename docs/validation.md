@@ -18,7 +18,7 @@ const createAccountSchema = z
       })
       .min(3, { message: "사용자 이름은 최소 3자 이상이어야 합니다." })
       .max(10, { message: "사용자 이름은 최대 10자 이하여야 합니다." })
-      .refine((username) => username === "감자칩", {
+      .refine((username) => username !== "감자칩", {
         message: "감자칩이라는 닉네임은 사용할 수 없습니다.",
       }),
     email: z
@@ -109,7 +109,7 @@ export const createAccountSchema = z
       })
       .min(3, { message: "사용자 이름은 최소 3자 이상이어야 합니다." })
       .max(10, { message: "사용자 이름은 최대 10자 이하여야 합니다." })
-      .refine((username) => username === "감자칩", {
+      .refine((username) => username !== "감자칩", {
         message: "감자칩이라는 닉네임은 사용할 수 없습니다.",
       })
       .transform((username) => `🔥${username}🔥`), //닉네임 양쪽에 이모지 추가

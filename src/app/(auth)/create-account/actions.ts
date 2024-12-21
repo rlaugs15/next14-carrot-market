@@ -1,40 +1,3 @@
-# Server Actions
-
-#### Server Actions이란?
-
-- "use server"로 선언된 함수이며, Client Component에서도 호출할 수 있다.
-- 함수나 파일에 작성해 두면, 함수 내용을 자동으로 서버 API로 만들어주고, 개발자는 유저에게 코드가 노출될 걱정 없이 자유롭게 데이터베이스를 관리할 수 있다.
-
-> 리액트 쿼리의 인자로 들어가는 axios나 fetch 요청 함수를 작성할 때 유용할 것 같다.
-
-### 목차
-
-- [Route Handlers](/docs/server-actions.md/#route-handlers)
-- [Server actions](/docs/server-actions.md/#server-actions)
-- [useFormState(useFormState -> useActionState로 변경)](/docs/server-actions.md/#useformstateuseformstate---useactionstate로-변경)
-
-# 유효성 검사(Validation)
-
-### 목차
-
-- [zod를 이용한 유효성 검사 에러 처리](/docs/validation.md/#zod를-이용한-유효성-검사-에러-처리)
-- [데이터 변형(zod는 검증 뿐 아니라 변환도 가능)](/docs/validation.md/#데이터-변형zod는-검증-뿐-아니라-변환도-가능)
-
-# 프리즈마ORM
-
-### 목자
-
-- [초기 세팅](/docs/prisma.md/#초기-세팅)
-- [Schemas 및 프리즈마 스튜디오](/docs/prisma.md/#schemas-및-프리즈마-스튜디오)
-- [Prisma Client 및 테스트(데이터베이스 쿼리 단계)](/docs/prisma.md/#prisma-client-및-테스트데이터베이스-쿼리-단계)
-
-# 인증(Authentication)
-
-## DB 유효성 검사(프리즈마 쿼리의 유효성 검사를 zod로)
-
-유효성 검사를 할 곳은 zod이기에 리팩토링
-
-```typescript
 "use server";
 
 import { passwordRegex } from "@/lib/constants";
@@ -118,22 +81,3 @@ export async function createAccount(prevState: any, formData: FormData) {
   } else {
   }
 }
-```
-
-### const result = await createAccountSchema.safeParseAsync(data);
-
-#### safeParse의 비동기 버전인 safeParseAsync로 바꾼 이유
-
-safeParseAsync는 zod가 모든 refine 함수에 대해 await하도록 한다.
-
-```typescript
-//safeParseAsync 사용 전
-.refine(await checkUniqueEmail(email), {
-       message: "해당 이메일에 이미 등록된 계정이 있습니다",
-     }),
-
-//safeParseAsync 사용 후
-.refine(checkUniqueEmail, {
-       message: "해당 이메일에 이미 등록된 계정이 있습니다",
-     }),
-```
