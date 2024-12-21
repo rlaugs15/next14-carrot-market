@@ -40,9 +40,27 @@ npx prisma init
 .env
 DATABASE_URL="file:./database.db"
 
+- 추후 실제 db로 변경할 것
+
 [Prisma (VSCode Extension)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
 
+### [플러그인 prisma 다운](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+
+cmd + shift + p로 JSON settings 파일을 열고
+
+```json
+"[prisma]": {
+"editor.defaultFormatter": "Prisma.prisma"
+}
+```
+
+추가하면 **save시** 릴레이션 자동완성
+
 ## Schemas
+
+- [모델 공식문서](https://www.prisma.io/docs/orm/prisma-schema/data-model/models#defining-models)
+- [모델 쿼리 공식문서](https://www.prisma.io/docs/orm/reference/prisma-client-reference#findunique)
+  - [자주 사용한 모델 쿼리 정리](https://velog.io/@rlaugs15/%ED%94%84%EB%A6%AC%EC%A6%88%EB%A7%88-%EB%AA%A8%EB%8D%B8-%EC%BF%BC%EB%A6%AC)
 
 모델을 생성하고 프리즈마에게 내 DB의 위치를 알려줬고, 데이터 관점에서 모델이 어떻게 생겼는지 알려줘야 한다.
 
@@ -51,7 +69,6 @@ DATABASE_URL="file:./database.db"
 **scema.prisma**
 
 ```typescript
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -125,5 +142,22 @@ export default prisma;
 import @lip/db
 ```
 
-해당 페이지에서 새로고침을 한다.  
+해당 페이지에서 새로고침을 한다.
 테스트가 성공한다면 터미널에 `username: "test"`을 가진 유저 모델이 뜬다.
+
+## Prisma Studio
+
+[Prisma Studio 공식문서](https://www.prisma.io/docs/orm/tools/prisma-studio)
+
+**데이터베이스의 데이터 시각화를 위한 편집기**
+Prisma 스키마 파일에 정의된 모든 모델 목록을 확인하고 데이터베이스를 관리할 수 있다.
+
+npx prisma studio
+
+### 모델을 변경하고 프리즈마 스튜디오에 반영할 경우
+
+- 터미널에서 프리즈마 스튜디오를 끄고 재시작
+
+> **주의점**
+> 터미널에서 넥스트js 서버를 끄지 않게 주의하자.
+> 분리된 탭에서 열어야 한다.
