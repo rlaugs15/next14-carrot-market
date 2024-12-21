@@ -94,3 +94,36 @@ model User {
 > 나만을 위한 로컬 디비들 추가
 > _.db
 > _.db-journal
+
+## Prisma Client 및 테스트(데이터베이스 쿼리 단계)
+
+[해당 단계 공식문서](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/querying-the-database-typescript-postgresql)
+
+### 테스트
+
+**/lib/db.ts**
+
+```typescript
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+async function test() {
+  const user = await prisma.user.create({
+    data: {
+      username: "test",
+    },
+  });
+}
+test();
+export default prisma;
+```
+
+**아무 page.tsx**
+
+```typescript
+import @lip/db
+```
+
+해당 페이지에서 새로고침을 한다.  
+테스트가 성공한다면 터미널에 `username: "test"`을 가진 유저 모델이 뜬다.
