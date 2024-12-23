@@ -22,7 +22,7 @@
 
 # 프리즈마ORM
 
-### 목자
+### 목차
 
 - [초기 세팅](/docs/prisma.md/#초기-세팅)
 - [Schemas 및 프리즈마 스튜디오](/docs/prisma.md/#schemas-및-프리즈마-스튜디오)
@@ -98,8 +98,9 @@ const createAccountSchema = z
       message: " 8자리 이상이며, 특수문자가 1개 이상 포함되어야 합니다.",
     }),
   })
-  .refine((data) => data.password !== data.confirm_password, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "비밀번호 확인에 실패했습니다.",
+    path: ["confirm_password"], //confirm_password에 에러출력
   });
 
 export async function createAccount(prevState: any, formData: FormData) {
@@ -124,7 +125,24 @@ export async function createAccount(prevState: any, formData: FormData) {
 
 #### safeParse의 비동기 버전인 safeParseAsync로 바꾼 이유
 
-safeParseAsync는 zod가 모든 refine 함수에 대해 await하도록 한다.
+- **safeParseAsync**
+
+  - Zod 스키마를 사용하여 비동기 데이터를 검증할 때 사용하는 함수
+  - 주로 비동기 작업 결과를 검증해야 하거나, Promise를 반환하는 데이터 소스를 다룰 때 유용
+  - 유효성 검사를 수행한 결과를 성공(success: true) 또는 실패(success: false)를 나타내는 객체로 반환
+  - 데이터 검증이 성공하면 data 속성을, 실패하면 error 속성을 제공
+  - **반환타입:**
+
+  ```typescript
+  type SafeParseReturnType<T> =
+    | { success: true; data: T }
+    | { success: false; error: ZodError };
+  ```
+
+#### safeParse vs safeParseAsync
+
+- **safeParse:** 스키마 검증이 동기적으로만 이루어질 때 사용
+- **safeParseAsync:** 스키마 검증 과정에서 비동기 작업(예: 데이터베이스 조회, API 호출 등)이 포함될 때 사용
 
 ```typescript
 //safeParseAsync 사용 전
@@ -136,4 +154,36 @@ safeParseAsync는 zod가 모든 refine 함수에 대해 await하도록 한다.
 .refine(checkUniqueEmail, {
        message: "해당 이메일에 이미 등록된 계정이 있습니다",
      }),
+```
+
+## 비밀번호 해싱
+
+- 보안상 데이터가 유출되어도, 원본 비밀번호를 알수없으니 해킹당하지않음
+- 정형데이터로 정해진 양식, 정해진 길이로 맞출 수있음
+
+#### bcrypt 설치
+
+npm i bcrypt
+npm i @types/bcrypt
+
+```typescript
+export async function createAccount(prevState: any, formData: FormData) {
+  const data = {
+    username: formData.get("username"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirm_password: formData.get("confirm_password"),
+  };
+
+  const result = await createAccountSchema.safeParseAsync(data);
+  console.log("result", result);
+  if (!result.success) {
+    console.log("실패");
+
+    return result.error.flatten();
+  } else {
+    console.log("성공");
+    // 비밀번호 해싱 (솔트 라운드: 12, 해싱 완료까지 대기하기 위해 await 사용)
+    const hashPass = await bcrypt.hash(result.data.password, 12);
+    //...나머지 코드
 ```

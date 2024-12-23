@@ -3,6 +3,7 @@
 import { passwordRegex } from "@/lib/constants";
 import prisma from "@/lib/db";
 import { z } from "zod";
+import bcrypt from "bcrypt";
 
 const checkUniqueUsername = async (username: string) => {
   const user = await prisma.user.findUnique({
@@ -40,10 +41,11 @@ const createAccountSchema = z
         required_error: "이름은 필수입니다.",
         invalid_type_error: "이름은 문자만 가능합니다.",
       })
+      .toLowerCase()
       .min(3, { message: "사용자 이름은 최소 3자 이상이어야 합니다." })
       .max(10, { message: "사용자 이름은 최대 10자 이하여야 합니다." })
       .refine(checkUniqueUsername, {
-        message: "감자칩이라는 닉네임은 사용할 수 없습니다.",
+        message: "이미 존재하는 닉네임입니다.",
       }),
     //.transform((username) => `🔥${username}🔥`),
     email: z
@@ -61,8 +63,9 @@ const createAccountSchema = z
       message: " 8자리 이상이며, 특수문자가 1개 이상 포함되어야 합니다.",
     }),
   })
-  .refine((data) => data.password !== data.confirm_password, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "비밀번호 확인에 실패했습니다.",
+    path: ["confirm_password"],
   });
 
 export async function createAccount(prevState: any, formData: FormData) {
@@ -72,12 +75,28 @@ export async function createAccount(prevState: any, formData: FormData) {
     password: formData.get("password"),
     confirm_password: formData.get("confirm_password"),
   };
-  console.log("username", data.username);
 
   const result = await createAccountSchema.safeParseAsync(data);
   console.log("result", result);
   if (!result.success) {
+    console.log("실패");
+
     return result.error.flatten();
   } else {
+    console.log("성공");
+    // 비밀번호 해싱 (솔트 라운드: 12, 해싱 완료까지 대기하기 위해 await 사용)
+    const hashPass = await bcrypt.hash(result.data.password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        username: result.data.username,
+        email: result.data.email,
+        password: hashPass,
+      },
+      select: {
+        id: true,
+      },
+    });
+    console.log(user);
   }
 }
