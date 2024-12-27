@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { redirect } from "next/navigation";
+import { getSession } from "@/lib/sessions";
 
 const checkUniqueUsername = async (username: string) => {
   const user = await prisma.user.findUnique({
@@ -102,11 +103,7 @@ export async function createAccount(prevState: any, formData: FormData) {
         id: true,
       },
     });
-    const cookie = await getIronSession(cookies(), {
-      cookieName: "delicious-karrot",
-      password: process.env.COOKIE_PASSWORD!,
-    });
-    //@ts-ignore
+    const cookie = await getSession();
     cookie.id = user.id;
     await cookie.save();
     redirect("/profile");
