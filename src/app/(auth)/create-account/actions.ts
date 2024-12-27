@@ -4,6 +4,9 @@ import { passwordRegex } from "@/lib/constants";
 import prisma from "@/lib/db";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import { redirect } from "next/navigation";
 
 const checkUniqueUsername = async (username: string) => {
   const user = await prisma.user.findUnique({
@@ -69,6 +72,8 @@ const createAccountSchema = z
   });
 
 export async function createAccount(prevState: any, formData: FormData) {
+  console.log(cookies());
+
   const data = {
     username: formData.get("username"),
     email: formData.get("email"),
@@ -97,6 +102,13 @@ export async function createAccount(prevState: any, formData: FormData) {
         id: true,
       },
     });
-    console.log(user);
+    const cookie = await getIronSession(cookies(), {
+      cookieName: "delicious-karrot",
+      password: process.env.COOKIE_PASSWORD!,
+    });
+    //@ts-ignore
+    cookie.id = user.id;
+    await cookie.save();
+    redirect("/profile");
   }
 }

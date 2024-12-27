@@ -187,3 +187,68 @@ export async function createAccount(prevState: any, formData: FormData) {
     const hashPass = await bcrypt.hash(result.data.password, 12);
     //...나머지 코드
 ```
+
+## Iron Session
+
+[1password password generator](https://1password.com/password-generator)
+
+- 비밀번호 생성 사이트
+
+iron-session은 안전하고, statelss한, 쿠키 기반 JavaScript용 세션 라이브러리
+
+```
+npm i iron-session
+```
+
+### 코드
+
+**/create-account/actions.ts**
+
+```tsx
+  } else {
+    console.log("성공");
+    // 비밀번호 해싱 (솔트 라운드: 12, 해싱 완료까지 대기하기 위해 await 사용)
+    const hashPass = await bcrypt.hash(result.data.password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        username: result.data.username,
+        email: result.data.email,
+        password: hashPass,
+      },
+      select: {
+        id: true,
+      },
+    });
+    const cookie = await getIronSession(cookies(), {
+      cookieName: "delicious-karrot",
+      password: process.env.COOKIE_PASSWORD!,
+    });
+    //@ts-ignore
+    cookie.id = user.id;
+    await cookie.save();
+    redirect("/profile");
+  }
+```
+
+cookies()함수는 넥스트js에서 지원하는 함수다.  
+env 파일에 비밀번호 생성 사이트에서 생성한 비밀번호를 넣었다.
+
+### 간단 요약
+
+Cookie - Web Browser (Client에서 사용)  
+Session - Server에서 사용
+
+단 쿠키안에 세션 ID가 있고  
+서버에 세션ID 안에 세션 존재.
+
+1. 브라우저가 서버 접속
+2. 서버에서 쿠키안에 세션ID를 브라우저에 전달
+3. 브라우저가 쿠키안에 세션ID와 페이지 데이터를 서버에 전달
+4. 서버에서 세션ID를 검색하고 페이지에 맞는 데이터 전달.
+
+그러나, 그냥 ID 데이터를 쿠키에 넣으면 보안상 문제가 생길 수 있음.  
+따라서 암호화해서 넣고, 빼서 다시 복호화할 것  
+이를 위한 도구로 Iron Session이라는 라이브러리를 사용
+
+어떻게 전달 하는지는 구현 방식에 따라 다름.
