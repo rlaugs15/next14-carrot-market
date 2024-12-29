@@ -121,6 +121,11 @@ export async function createAccount(prevState: any, formData: FormData) {
 }
 ```
 
+> #### zod에서 처리해야될 범위
+>
+> 사용자가 생성한 데이터나 사용자가 제어할 수 없는 다른 API에서 가져온 데이터처럼 신뢰할 수 없거나  
+>  제어할 수 없는 데이터를 파싱하고 유효성을 검사할 때 Zod를 사용해야 한다.
+
 ### const result = await createAccountSchema.safeParseAsync(data);
 
 #### safeParse의 비동기 버전인 safeParseAsync로 바꾼 이유
@@ -264,3 +269,33 @@ Session - Server에서 사용
    a. iron session을 통해 설정한 cookieName에 해당하는 쿠키가 있는 지 확인하고, 없다면 세션 데이터를 암호화하고 쿠키를 설정함  
    (쿠키를 설정할 때는 쿠키에 저장할 데이터를 암호화하여 저장함)
 5. 위 단계를 모두 통과했다면 특정 페이지로 리다이렉트 처리
+
+## zod: superRefine
+
+### 문제상황
+
+회원가입 페이지에서 하나의 유효성 검사만 통과하지 못할 경우에도 모든 영역에서 에러 메시지가 발생
+
+### 해결
+
+superRefine를 이용해 유효성 검사를 문제 위치에서 멈춘다.
+
+- [해결과정: zod의 refine과 superRefine](https://jmjjjmj.tistory.com/223)
+
+#### [.superRefine](https://zod.dev/?id=superrefine)
+
+ctx.addIssue를 통해 원하는 만큼 이슈를 추가할 수 있다.  
+함수 실행 중에 ctx.addIssue가 호출되지 않으면 유효성 검사가 통과된다.
+
+- fatal: true 설정 시, 그 다음 refine이 실행되는 것을 방지
+- z.NEVER 설정 시, 반환 값 자체를 사용하기 위해서가 아닌, 타입 시스템을 맞추기 위함
+- (함수가 특정한 타입 검사를 통과시키면서도, 그 결과 값을 반환할 필요가 없을 때 사용)
+
+**Zod의 오류 처리**  
+아래 문서는 Zod의 내부 오류 처리 시스템과 이를 목적에 맞게 사용자 정의할 수 있는 다양한 방법을 설명한다.  
+[zod 에러 핸들링](https://zod.dev/ERROR_HANDLING?id=error-handling-in-zod)
+
+> #### [z.NEVER을 사용한 이유](https://zod.dev/?id=abort-early)
+>
+> fatal: true만 적어도 뒤의 refine은 실행되지 않는다.  
+>  반환값은 사용되지는 않지만 타입을 위해서 반환한다.
