@@ -299,3 +299,46 @@ ctx.addIssue를 통해 원하는 만큼 이슈를 추가할 수 있다.
 >
 > fatal: true만 적어도 뒤의 refine은 실행되지 않는다.  
 >  반환값은 사용되지는 않지만 타입을 위해서 반환한다.
+
+## 로그아웃
+
+```tsx
+async function getUser() {
+  const session = await getSession();
+  if (session.id) {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: session.id,
+      },
+    });
+    if (user) {
+      return user;
+    }
+  }
+  notFound();
+}
+
+export default async function Profile() {
+  const user = await getUser();
+  const logOut = async () => {
+    "use server";
+    const session = await getSession();
+    session.destroy();
+    redirect("/");
+  };
+  return (
+    <div>
+      <h1>{user?.username}</h1>
+      <form action={logOut}>
+        <button>로그아웃</button> //혹은 <input type="submit" value="logout" />
+      </form>
+    </div>
+  );
+}
+```
+
+코드를 보면 onClick 이벤트를 사용하지 않았다. 클라이언트에서 동작하는 이벤트이기 때문이다.
+
+### [notFound()](https://nextjs-ko.org/docs/app/api-reference/functions/not-found)
+
+notFound() 함수를 호출하면 NEXT_NOT_FOUND 오류가 발생하며, 오류가 발생한 라우트 세그먼트의 렌더링이 중단

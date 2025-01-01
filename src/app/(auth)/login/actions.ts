@@ -54,6 +54,7 @@ export async function handleForm(prevState: any, formData: FormData) {
     );
     if (ok) {
       const session = await getSession();
+      session.save();
       session.id = user!.id;
       redirect("/profile");
     } else {
