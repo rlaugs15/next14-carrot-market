@@ -342,3 +342,32 @@ export default async function Profile() {
 ### [notFound()](https://nextjs-ko.org/docs/app/api-reference/functions/not-found)
 
 notFound() 함수를 호출하면 NEXT_NOT_FOUND 오류가 발생하며, 오류가 발생한 라우트 세그먼트의 렌더링이 중단
+
+## middleware
+
+미들웨어를 사용하면 request가 완료되기 전에 코드를 실행할 수 있다.
+
+```tsx
+export async function middleware(request: NextRequest) {
+  const session = await getSession();
+  console.log("session", session);
+
+  if (request.nextUrl.pathname === "/profile") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+}
+```
+
+### [미들웨어 사용 케이스](https://nextjs-ko.org/docs/app/building-your-application/routing/middleware#use-cases)
+
+- **1. 인증 및 권한 부여:**  
+  특정 페이지나 API 라우트에 대한 액세스 권한을 부여하기 전에 사용자 신원을 확인하고 세션 쿠키를 확인할 때 사용할 수 있다.
+- **2. 서버 사이드 리디렉션:**  
+  특정 조건(예: local, 사용자 조건)에 따라 서버에서 사용자를 리디렉션한다.
+- **3. 경로 Rewriting**:  
+  request 속성을 기반으로 API 라우트 또는 페이지에 대한 라우트를 동적으로 재작성하여 A/B 테스트, 기능 출시 또는 레거시 경로를 지원한다.
+- **4. 봇 탐지:**  
+  봇 트래픽을 탐지하고 차단하여 리소스를 보호한다.
+- **5. 로깅 및 분석**
+- **6. 기능 플래그 지정**  
+  https://nextjs.org/docs/app/building-your-application/routing/middleware#use-cases
