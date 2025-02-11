@@ -345,7 +345,8 @@ notFound() 함수를 호출하면 NEXT_NOT_FOUND 오류가 발생하며, 오류�
 
 ## middleware
 
-미들웨어를 사용하면 request가 완료되기 전에 코드를 실행할 수 있다.
+미들웨어를 사용하면 request가 완료되기 전에 코드를 실행할 수 있다.  
+**프로젝트의 모든 라우트에 대해 호출된다.**
 
 ```tsx
 export async function middleware(request: NextRequest) {
@@ -371,3 +372,19 @@ export async function middleware(request: NextRequest) {
 - **5. 로깅 및 분석**
 - **6. 기능 플래그 지정**  
   https://nextjs.org/docs/app/building-your-application/routing/middleware#use-cases
+
+## Matcher(미들웨어가 특정 페이지에서만 실행)
+
+matcher를 사용하면 matcher에 지정한 특정 경로들에서만 미들웨어가 실행되도록 할 수 있다.
+
+```tsx
+// 배열 구문을 사용하여 단일 경로 또는 다중 경로를 일치시킬 수 있습니다.
+export const config = {
+  matcher: ["/profile", "/about/:path*", "/dashboard/:path*"],
+};
+
+//mathcer는 전체 정규식 표현식을 허용한다. (부정 예측 또는 문자 일치 등)
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+```
