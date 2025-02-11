@@ -388,3 +388,55 @@ export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
 ```
+
+## Edge Runtime
+
+Next.js에서 **미들웨어(Middleware)**는 **Edge 런타임**에서 실행되며, 이는 **Node.js 전용 API를 지원하지 않는다**는 점을 이해하는 것이 중요하다.  
+ 따라서, 미들웨어를 작성할 때는 **Edge 런타임과 호환되는 API만 사용**해야 한다.
+
+### Next.js의 두 가지 서버 런타임:
+
+1. **Node.js 런타임 (기본값):**
+
+   - **모든 Node.js API 및 호환 패키지**에 접근할 수 있다.
+   - **서버 사이드 렌더링(SSR)**과 같은 기능을 지원한다.
+
+2. **Edge 런타임:**
+   - **제한된 API**를 지원하며, **Node.js 전용 API는 지원하지 않는다**.
+   - **미들웨어**와 같은 기능에 사용된다.
+   - **빠른 응답 시간**과 **낮은 지연 시간**이 요구되는 작업에 적합하다.
+
+**Edge 런타임에서 지원되는 API:**
+
+- **네트워크 API:**
+
+  - `fetch`
+  - `Request`
+  - `Response`
+  - `Headers`
+
+- **인코딩 API:**
+
+  - `TextEncoder`
+  - `TextDecoder`
+
+- **스트림 API:**
+
+  - `ReadableStream`
+  - `WritableStream`
+  - `TransformStream`
+
+- **암호화 API:**
+
+  - `crypto.subtle`
+
+- **웹 표준 API:**
+  - `URL`
+  - `URLSearchParams`
+
+**Edge 런타임에서 지원되지 않는 Node.js API 예시:**
+
+- `fs` (파일 시스템)
+- `path`
+- `process`
+- `Buffer`
