@@ -67,6 +67,11 @@ model User {
 }
 ```
 
+- **datasource db.provider**
+  - 어떤 데이터베이스 종류를 사용할지를 지정
+  - 프리즈마는 ${\textsf{\color{#4174D9}통역사일 뿐}}$이므로 특정 db만 쓸 필요는 없다.  
+    사용하는 db에 따라서 프리즈마가 적절한 포멧 파일이나 마이그레이션 파일 등을 만들어줄 것이다.
+
 ### npx prisma migrate dev
 
 [공식문서](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/install-prisma-client-typescript-postgresql)

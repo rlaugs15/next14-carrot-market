@@ -43,3 +43,9 @@
 - [Edge Runtime](/docs/authentication.md/#edge-runtime)
 - [Authentication Middleware(인증된 사용자만 접근되는 미들웨어)](/docs/authentication.md/#authentication-middleware인증된-사용자만-접근되는-미들웨어)
 - [요약](/docs/authentication.md/#요약)
+
+# 소셜 인증(Social Authentication)
+
+### 목차
+
+- [Github Authentication](/docs/social-authentication.md/#github-authentication)
