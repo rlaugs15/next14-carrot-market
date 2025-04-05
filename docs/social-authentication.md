@@ -22,7 +22,7 @@ Route Handlers를 사용하면 웹 요청 및 응답 API를 사용하여 특정 
 `app/api/github/start/route.ts`
 
 ```typescript
-export async function GET(request: Request) {
+export async function GET() {
   const baseURL = "https://github.com/login/oauth/authorize";
   const params = {
     client_id: process.env.GITHUB_CLIENT_ID!,
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   const formattedParams = new URLSearchParams(params).toString();
   const fullURL = `${baseURL}?${formattedParams}`;
 
-  return Response.redirect(fullURL);
+  return redirect(fullURL);
 }
 ```
 
@@ -97,3 +97,89 @@ Response.json(data);
 - 이건 Response 클래스가 자체적으로 제공하는 **도우미 함수(헬퍼)**
 - 내부적으로는 `JSON.stringify` 하고, `"Content-Type": "application/json"`도 자동으로 붙여줌
 - `new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } })`를 짧게 쓴 버전이라 보면 된다.
+
+## Github API
+
+액세스 토큰을 사용하면 사용자를 대신하여 API에 요청  
+유저 아이디나 닉네임 등 필요한 정보들을 가져온다.
+
+```
+Authorization: Bearer OAUTH-TOKEN
+GET https://api.github.com/user
+```
+
+`app/api/github/complete/route.ts`
+
+```typescript
+export async function GET(request: NextRequest) {
+  const code = request.nextUrl.searchParams.get("code");
+  if (!code) {
+    return notFound();
+  }
+  const accessTokenParams = new URLSearchParams({
+    client_id: process.env.GITHUB_CLIENT_ID!,
+    client_secret: process.env.GITHUB_CLIENT_SECRET!,
+    code,
+  });
+  const accessTokenURL = `https://github.com/login/oauth/access_token?${accessTokenParams}`;
+  const { error, access_token } = await (
+    await fetch(accessTokenURL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+    })
+  ).json();
+  if (error) {
+    return new Response(null, {
+      status: 400,
+    });
+  }
+  /* 캐럿마켓의 유저 데이터에 필요한 것들을 가져온다. */
+  const { id, login, avatar_url } = await (
+    await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+      cache: "no-store",
+    })
+  ).json();
+
+  const user = await prisma.user.findUnique({
+    where: {
+      github_id: id + "",
+    },
+    select: {
+      id: true,
+    },
+  });
+  if (user) {
+    const session = await getSession();
+    session.id = user.id;
+    await session.save();
+    return redirect("/profile");
+  }
+  const userNameCheck = await prisma.user.findUnique({
+    where: {
+      username: login,
+    },
+    select: {
+      username: true,
+    },
+  });
+  const newUser = await prisma.user.create({
+    data: {
+      github_id: id + "",
+      avatar: avatar_url,
+      username: userNameCheck ? `login-${login}` : login,
+    },
+    select: {
+      id: true,
+    },
+  });
+  const session = await getSession();
+  session.id = newUser.id;
+  await session.save();
+  return redirect("/profile");
+}
+```
