@@ -49,3 +49,4 @@
 ### 목차
 
 - [Github Authentication](/docs/social-authentication.md/#github-authentication)
+- [Access Token](/docs/social-authentication.md/#access-token)
