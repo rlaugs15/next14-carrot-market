@@ -183,3 +183,32 @@ export async function GET(request: NextRequest) {
   return redirect("/profile");
 }
 ```
+
+## SMS Token
+
+토큰을 생성하고, 검증하는 로직을 구현
+
+### [Twilio](https://www.twilio.com/)
+
+SMS, 음성, 영상, 이메일 등 다양한 통신 서비스를 제공하는 클라우드 기반 플랫폼  
+특히, SMS 서비스를 통해 개발자가 간편하게 문자 메시지를 전송하고 수신할 수 있도록 API를 제공
+
+`app/(auth)/sms/actions.ts`
+
+#### 전화번호가 유효할 경우 해야할 것
+
+1. 이전 토큰 삭제
+2. 새 토큰 생성
+3. 생성된 토큰을 twilio의 sms를 통해 유저에게 전송
+
+### crypto
+
+Node.js에서 보안 관련 작업을 처리할 때 사용하는 내장 모듈
+
+- **주요 기능**: 랜덤값 생성, 해시, 암호화 등
+- **사용 예**: 비밀번호 해시, 인증 코드 생성, 토큰 생성 등
+
+> **왜 Math.random() 대신 crypto.randomInt()?**  
+> Math.random()은 보안적으로 안전하지 않음  
+> 인증번호, 토큰, 비밀번호 같은 보안 관련 값 생성 시에는 crypto를 써야 함  
+> crypto.randomInt()는 암호학적으로 안전한 난수를 제공

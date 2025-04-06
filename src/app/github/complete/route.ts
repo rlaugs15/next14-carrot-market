@@ -1,6 +1,6 @@
+import { getAccessToken, getGitHubProfile, loginAndRedirect } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { getSession } from "@/lib/sessions";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -13,30 +13,18 @@ export async function GET(request: NextRequest) {
     client_secret: process.env.GITHUB_CLIENT_SECRET!,
     code,
   });
-  const accessTokenURL = `https://github.com/login/oauth/access_token?${accessTokenParams}`;
-  const { error, access_token } = await (
-    await fetch(accessTokenURL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
-    })
-  ).json();
+  const { error, access_token } = await getAccessToken(accessTokenParams);
   if (error) {
     return new Response(null, {
       status: 400,
     });
   }
   /* 캐럿마켓의 유저 데이터에 필요한 것들을 가져온다. */
-  const { id, login, avatar_url } = await (
-    await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-      cache: "no-store",
-    })
-  ).json();
-
+  const { id, login, avatar_url } = await getGitHubProfile(
+    access_token,
+    "https://api.github.com/user"
+  );
+  const [{ email }] = await getGitHubProfile(access_token, "https://api.github.com/user/emails");
   const user = await prisma.user.findUnique({
     where: {
       github_id: id + "",
@@ -46,10 +34,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (user) {
-    const session = await getSession();
-    session.id = user.id;
-    await session.save();
-    return redirect("/profile");
+    loginAndRedirect(user.id);
   }
   const userNameCheck = await prisma.user.findUnique({
     where: {
@@ -64,13 +49,11 @@ export async function GET(request: NextRequest) {
       github_id: id + "",
       avatar: avatar_url,
       username: userNameCheck ? `login-${login}` : login,
+      email,
     },
     select: {
       id: true,
     },
   });
-  const session = await getSession();
-  session.id = newUser.id;
-  await session.save();
-  return redirect("/profile");
+  loginAndRedirect(newUser.id);
 }

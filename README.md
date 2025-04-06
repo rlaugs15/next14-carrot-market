@@ -50,3 +50,5 @@
 
 - [Github Authentication](/docs/social-authentication.md/#github-authentication)
 - [Access Token](/docs/social-authentication.md/#access-token)
+- [Github API](/docs/social-authentication.md/#github-api)
+- [SMS Token](/docs/social-authentication.md/#sms-token)
