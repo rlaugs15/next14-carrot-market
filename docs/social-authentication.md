@@ -244,3 +244,88 @@ export const tokenSchema = z.coerce
   .max(999999)
   .refine(tokenExists, "토큰이 존재하지 않습니다.");
 ```
+
+#### `app/(auth)/sms/actions.ts`
+
+```typescript
+export async function handleForm(prevState: ActionState, formData: FormData) {
+  const phone = formData.get("phone");
+  const token = formData.get("token");
+
+  if (!prevState.token) {
+    const result = phoneSchema.safeParse(phone);
+    if (!result.success) {
+      return {
+        token: false,
+        error: result.error.flatten(),
+      };
+    } else {
+      //이전 토큰 삭제
+      await prisma.sMSToken.deleteMany({
+        where: {
+          user: {
+            phone: result.data,
+          },
+        },
+      });
+      //새 토큰 생성
+      const token = await createToken();
+      await prisma.sMSToken.create({
+        data: {
+          token,
+          user: {
+            connectOrCreate: {
+              where: {
+                phone: result.data,
+              },
+              create: {
+                username: crypto.randomBytes(10).toString("hex"),
+              },
+            },
+          },
+        },
+      });
+      //생성된 토큰을 twilio의 sms를 통해 유저에게 전송
+      return {
+        token: true,
+      };
+    }
+  } else {
+    const result = await tokenSchema.spa(token);
+    if (!result.success) {
+      return {
+        token: true,
+        error: result.error.flatten(),
+      };
+    } else {
+      const token = await prisma.sMSToken.findUnique({
+        where: {
+          token: result.data.toString(),
+        },
+        select: {
+          id: true,
+          userId: true,
+        },
+      });
+      const session = await getSession();
+      session.id = token?.id;
+      await session.save();
+      await prisma.sMSToken.delete({
+        where: {
+          id: token!.id,
+        },
+      });
+      redirect("/profile");
+    }
+  }
+}
+```
+
+## Twilio SMS
+
+Twilio를 이용하면 지금까지 구현한 인증 작업을 알아서 해주지만 가격이 높다.  
+이용하고 싶다면 인강을 보자.
+
+## Code Challenge(Twilio OTP)
+
+Twilio는 OTP도 제공한다. 이용하고 싶다면 인강을 보자.

@@ -53,3 +53,5 @@
 - [Github API](/docs/social-authentication.md/#github-api)
 - [SMS Token](/docs/social-authentication.md/#sms-token)
 - [Token Verification](/docs/social-authentication.md/#token-verification)
+- [Twilio SMS](/docs/social-authentication.md/#twilio-sms)
+- [Code Challenge(Twilio OTP)](/docs/social-authentication.md/#code-challengetwilio-otp)
