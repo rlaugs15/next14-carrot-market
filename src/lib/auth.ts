@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "./sessions";
+import prisma from "./db";
 
 export async function loginAndRedirect(id: number) {
   const session = await getSession();
@@ -31,4 +32,16 @@ export const getGitHubProfile = async (access_token: string, url: string) => {
     })
   ).json();
   return result;
+};
+
+export const tokenExists = async (token: number) => {
+  const exists = await prisma.sMSToken.findUnique({
+    where: {
+      token: token + "",
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !!exists;
 };

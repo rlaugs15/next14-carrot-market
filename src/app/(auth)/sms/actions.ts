@@ -4,6 +4,7 @@ import crypto from "crypto";
 import prisma from "@/lib/db";
 import { phoneSchema, tokenSchema } from "@/lib/zod/user-schema";
 import { redirect } from "next/navigation";
+import { getSession } from "@/lib/sessions";
 
 interface ActionState {
   token: boolean;
@@ -70,14 +71,31 @@ export async function handleForm(prevState: ActionState, formData: FormData) {
       };
     }
   } else {
-    const result = tokenSchema.safeParse(token);
+    const result = await tokenSchema.spa(token);
     if (!result.success) {
       return {
         token: true,
         error: result.error.flatten(),
       };
     } else {
-      redirect("/");
+      const token = await prisma.sMSToken.findUnique({
+        where: {
+          token: result.data.toString(),
+        },
+        select: {
+          id: true,
+          userId: true,
+        },
+      });
+      const session = await getSession();
+      session.id = token?.id;
+      await session.save();
+      await prisma.sMSToken.delete({
+        where: {
+          id: token!.id,
+        },
+      });
+      redirect("/profile");
     }
   }
 }

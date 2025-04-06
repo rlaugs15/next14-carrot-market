@@ -212,3 +212,35 @@ Node.js에서 보안 관련 작업을 처리할 때 사용하는 내장 모듈
 > Math.random()은 보안적으로 안전하지 않음  
 > 인증번호, 토큰, 비밀번호 같은 보안 관련 값 생성 시에는 crypto를 써야 함  
 > crypto.randomInt()는 암호학적으로 안전한 난수를 제공
+
+## Token Verification
+
+사용자가 받은 토큰을 나에게 보낼 때 어떻게 되는지 집중해보자.
+
+#### 토큰 검증 함수 추가 및 스키마 수정
+
+```typescript
+const createToken = async () => {
+  const token = crypto.randomInt(100000, 999999).toString();
+  const exists = await prisma.sMSToken.findUnique({
+    where: {
+      token,
+    },
+    select: {
+      id: true,
+    },
+  });
+  //같은 토큰이 존재한다면 다른 유저가 인증을 하는 중이므로 새로 생성
+  if (exists) {
+    return createToken();
+  } else {
+    return token;
+  }
+};
+
+export const tokenSchema = z.coerce
+  .number()
+  .min(100000)
+  .max(999999)
+  .refine(tokenExists, "토큰이 존재하지 않습니다.");
+```
