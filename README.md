@@ -61,4 +61,4 @@
 ### 목차
 
 - [Introduction](/docs/products.md/#introduction)
-- [Tab Bar](/docs/products.md/#tap-bar)
+- [Tab Bar](/docs/products.md/#tab-barheroicons-라이브러리-적용)
